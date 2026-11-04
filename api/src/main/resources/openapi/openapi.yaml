@@ -1,0 +1,157 @@
+openapi: 3.1.0
+info:
+  title: Coding Challenge
+  description: Coding Challenge API
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+paths:
+  /tasks:
+    get:
+      summary: Retrieve all tasks
+      description: "GET to return all tasks"
+      operationId: getTasks
+      responses:
+        "200":
+          description: "Success - Returns all tasks"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/task'
+    post:
+      summary: Create a task
+      description: "POST a task"
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/taskPostBody'
+      responses:
+        "201":
+          description: "Task successfully created"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task'
+    patch:
+      summary: Update a task
+      description: "PATCH a task. Update the status of a task by Id"
+      operationId: updateTaskById
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/taskPatchBody'
+      responses:
+        "200":
+          description: "Success - Task updated"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task'
+        "404":
+          description: "Task not found"
+  /tasks/{taskId}:
+    get:
+      summary: Retrieve task by Id
+      description: "GET to return a task by its taskId"
+      operationId: getTaskById
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "Success - Returns single task with given Id"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task'
+        "404":
+          description: "Task not found"
+    delete:
+      summary: Delete a task
+      description: "DELETE a task by task Id"
+      operationId: deleteTaskById
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: "Success - task deleted."
+        "404":
+          description: "Task not found"
+        "500":
+          description: "Internal server error"
+
+components:
+  schemas:
+    task:
+      type: object
+      properties:
+        taskId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum:
+            - "PENDING"
+            - "IN PROGRESS"
+            - "COMPLETED"
+        dueDate:
+          type: string
+          format: date-time
+      required:
+        - taskId
+        - title
+        - status
+        - dueDate
+
+    taskPatchBody:
+      type: object
+      properties:
+        taskId:
+          type: integer
+        status:
+          type: string
+          enum:
+            - "PENDING"
+            - "IN PROGRESS"
+            - "COMPLETED"
+      required:
+        - taskId
+        - status
+
+    taskPostBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum:
+            - "PENDING"
+            - "IN PROGRESS"
+            - "COMPLETED"
+        dueDate:
+          type: string
+          format: date-time
+      required:
+        - title
+        - status
+        - dueDate
