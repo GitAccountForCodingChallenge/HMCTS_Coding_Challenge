@@ -5,9 +5,12 @@ info:
   version: 1.0.0
 servers:
   - url: 'http://localhost:8080'
+
 paths:
   /tasks:
     get:
+      tags:
+        - Task
       summary: Retrieve all tasks
       description: "GET to return all tasks"
       operationId: getTasks
@@ -21,6 +24,8 @@ paths:
                 items:
                   $ref: '#/components/schemas/task'
     post:
+      tags:
+        - Task
       summary: Create a task
       description: "POST a task"
       operationId: createTask
@@ -37,27 +42,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/task'
-    patch:
-      summary: Update a task
-      description: "PATCH a task. Update the status of a task by Id"
-      operationId: updateTaskById
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/taskPatchBody'
-      responses:
-        "200":
-          description: "Success - Task updated"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/task'
-        "404":
-          description: "Task not found"
   /tasks/{taskId}:
     get:
+      tags:
+        - Task
       summary: Retrieve task by Id
       description: "GET to return a task by its taskId"
       operationId: getTaskById
@@ -76,7 +64,38 @@ paths:
                 $ref: '#/components/schemas/task'
         "404":
           description: "Task not found"
+    patch:
+      summary: Update task status
+      description: "Update the status of a task by its taskId"
+      operationId: updateTaskById
+      tags:
+        - Task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/taskPatchBody'
+      responses:
+        "200":
+          description: Success - Task updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task'
+        "400":
+          description: Invalid request
+        "404":
+          description: Task not found
     delete:
+      tags:
+        - Task
       summary: Delete a task
       description: "DELETE a task by task Id"
       operationId: deleteTaskById
@@ -93,7 +112,22 @@ paths:
           description: "Task not found"
         "500":
           description: "Internal server error"
-
+  /tasks/summaries:
+    get:
+      tags:
+        - Task
+      summary: Retrieve task summaries
+      description: "GET the IDs and titles of all non-deleted tasks"
+      operationId: getTaskSummaries
+      responses:
+        '200':
+          description: Task summaries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskSummary'
 components:
   schemas:
     task:
@@ -123,8 +157,6 @@ components:
     taskPatchBody:
       type: object
       properties:
-        taskId:
-          type: integer
         status:
           type: string
           enum:
@@ -132,7 +164,6 @@ components:
             - "IN PROGRESS"
             - "COMPLETED"
       required:
-        - taskId
         - status
 
     taskPostBody:
@@ -155,3 +186,15 @@ components:
         - title
         - status
         - dueDate
+
+    TaskSummary:
+      type: object
+      required:
+        - taskId
+        - title
+      properties:
+        taskId:
+          type: integer
+          format: int32
+        title:
+          type: string
