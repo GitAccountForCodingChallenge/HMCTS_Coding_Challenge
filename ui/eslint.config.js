@@ -1,21 +1,47 @@
 import js from '@eslint/js'
 import globals from 'globals'
+import tseslint from 'typescript-eslint'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import { defineConfig, globalIgnores } from 'eslint/config'
+import {defineConfig, globalIgnores} from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores([
+    'dist/**',
+    'coverage/**',
+    'node_modules/**',
+    'src/services/generated/**'
+  ]),
+
   {
-    files: ['**/*.{js,jsx}'],
+    files: ['**/*.{js,jsx,ts,tsx}'],
+
     extends: [
       js.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
+      tseslint.configs.recommended,
+      reactHooks.configs.flat.recommended
     ],
+
     languageOptions: {
-      globals: globals.browser,
-      parserOptions: { ecmaFeatures: { jsx: true } },
-    },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.jest
+      },
+
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true
+        }
+      }
+    }
   },
+
+  {
+    files: ['src/**/*.{jsx,tsx}'],
+
+    extends: [
+      reactRefresh.configs.vite
+    ]
+  }
 ])
